@@ -6,7 +6,7 @@ Makes the pattern for sending real emails as well understood and easily accompli
 
 ## Example Configuration and Use _(not complete)_
 
-1. Add defaults to your settings json file
+### Add defaults to your settings json file
 
 ```
 {
@@ -24,17 +24,17 @@ Makes the pattern for sending real emails as well understood and easily accompli
 
 ```
 
-2. Create a new instance of `Mailer()`
+### Create a new instance of `Mailer()`
 
-```
+```javascript
     var ButtonMailer = new Mailer({
         from: '<some email address>'
         // , message: 'This message overrides the json settings default'
     });
 ```
-3. Send an email
+### Send an email
 
-```
+```javascript
     ButtonMailer.send("NewMessage", {
         subject: 'You have a new message from the future!'
         // , message: 'This message overrides the constructor default'
