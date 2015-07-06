@@ -51,7 +51,7 @@ Tinytest.add('TDD - expect error - test for result', function (test) {
     TestMailer.send("NewMessage", {
         message: 'Send default'
     }, function(err, res){
-        test.isNull(res);
+        test.isUndefined(res);
     });
 
 });
