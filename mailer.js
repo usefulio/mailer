@@ -66,4 +66,28 @@ Mailer.send = function (routeName, email, options) {
   return this.router.send(routeName, email || {}, options || {});
 };
 
-Mailer.router.route('default', resolvePropertyValues);
+if (Meteor.isServer) {
+  Mailer._defaultServiceProvider = function (email) {
+    Email.send(email);
+    email.sent = true;
+    return email;
+  };
+} else {
+  Mailer._defaultServiceProvider = function (email) {
+    console.log("You do not have an email service provider set. To enable sending call Mailer.setDefaultServiceProvider()");
+    email.sent = true;
+    return email;
+  };
+}
+
+Mailer.setDefaultServiceProvider = function (provider) {
+  Mailer._defaultServiceProvider = provider;
+};
+
+Mailer.router.route('sendViaDefaultServiceProvider', function (email) {
+  return Mailer._defaultServiceProvider(email);
+});
+
+Mailer.router.route('default', resolvePropertyValues, 'sendViaDefaultServiceProvider');
+
+

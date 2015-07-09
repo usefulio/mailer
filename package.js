@@ -10,9 +10,13 @@ Package.describe({
   documentation: 'README.md'
 });
 
+// Allows us to test the default ESP ('email' package)
+Npm.depends({ "stream-buffers": "0.2.5" });
+
 Package.onUse(function(api) {
   api.versionsFrom('1.1.0.2');
   api.use('underscore');
+  api.use('email', 'server');
 
   api.use('useful:mailer-core');
   api.imply('useful:mailer-core');
@@ -23,5 +27,6 @@ Package.onUse(function(api) {
 Package.onTest(function(api) {
   api.use('tinytest');
   api.use('useful:mailer');
+  api.use('email', 'server');
   api.addFiles('mailer-tests.js');
 });
