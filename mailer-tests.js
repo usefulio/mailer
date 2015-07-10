@@ -112,7 +112,10 @@ if (Meteor.isServer) {
 
   // Create a dummy user to interact with
   var user = Meteor.users.insert({
-    emails: [
+    profile: {
+      name: 'name'
+    }
+    , emails: [
       {
         address: 'test@example.com'
         , verified: true
@@ -220,3 +223,70 @@ Tinytest.add('Mailer - Mailer rejects messages which do not pass the user notifi
     , optional: true
   }), null);
 });
+
+if (Meteor.isServer) {
+  Tinytest.add('Mailer - Mailer resolves templates when sending email' , function (test) {
+    var CustomMailer = Mailer.factory(null, _.pick(Mailer.config, 'resolveTemplates'));
+
+    var userId = Meteor.users.findOne()._id;
+
+    test.equal(CustomMailer.send({
+      from: 'test@example.com'
+      , to: 'test@example.com'
+      , subject: 'test'
+      , text: 'test'
+      , template: 'test'
+    }), {
+      from: 'test@example.com'
+      , to: 'test@example.com'
+      , subject: 'test'
+      , text: 'test'
+      , html: '<p>test</p>'
+      , template: 'test'
+    });
+  });
+  Tinytest.add('Mailer - Mailer resolves layout' , function (test) {
+    var CustomMailer = Mailer.factory(null, _.pick(Mailer.config, 'resolveTemplates'));
+
+    var userId = Meteor.users.findOne()._id;
+
+    test.equal(CustomMailer.send({
+      from: 'test@example.com'
+      , to: 'test@example.com'
+      , subject: 'test'
+      , text: 'test'
+      , template: 'test'
+      , layoutTemplate: 'testLayout'
+    }), {
+      from: 'test@example.com'
+      , to: 'test@example.com'
+      , subject: 'test'
+      , text: 'test'
+      , html: '<div><p>test</p></div>'
+      , template: 'test'
+      , layoutTemplate: 'testLayout'
+    });
+  });
+  Tinytest.add('Mailer - Mailer resolves template metadata' , function (test) {
+    var CustomMailer = Mailer.factory(null, _.pick(Mailer.config, 'metadata', 'resolveTemplates', 'templateMetadata'));
+
+    var userId = Meteor.users.findOne()._id;
+
+    test.equal(CustomMailer.send({
+      from: 'test@example.com'
+      , to: 'test@example.com'
+      , subject: 'test'
+      , text: 'test'
+      , template: 'test'
+    }), {
+      from: 'test@example.com'
+      , to: 'test@example.com'
+      , fromId: userId
+      , toId: userId
+      , subject: 'test'
+      , text: 'test'
+      , html: '<p>testname</p>'
+      , template: 'test'
+    });
+  });
+}
