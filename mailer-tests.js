@@ -250,14 +250,14 @@ Tinytest.add('Mailer - Mailer resolves templates when sending email' , function 
     , to: 'test@example.com'
     , subject: 'test'
     , text: 'test'
-    , template: 'test'
+    , template: 'testMail'
   }), {
     from: 'test@example.com'
     , to: 'test@example.com'
     , subject: 'test'
     , text: 'test'
     , html: '<p>test</p>'
-    , template: 'test'
+    , template: 'testMail'
   });
 });
 Tinytest.add('Mailer - Mailer resolves layout' , function (test) {
@@ -272,7 +272,7 @@ Tinytest.add('Mailer - Mailer resolves layout' , function (test) {
     , to: 'test@example.com'
     , subject: 'test'
     , text: 'test'
-    , template: 'test'
+    , template: 'testMail'
     , layoutTemplate: 'testLayout'
   }), {
     from: 'test@example.com'
@@ -280,7 +280,7 @@ Tinytest.add('Mailer - Mailer resolves layout' , function (test) {
     , subject: 'test'
     , text: 'test'
     , html: '<div><p>test</p></div>'
-    , template: 'test'
+    , template: 'testMail'
     , layoutTemplate: 'testLayout'
   });
 });
@@ -296,7 +296,7 @@ Tinytest.add('Mailer - Mailer resolves template metadata' , function (test) {
     , to: 'test@example.com'
     , subject: 'test'
     , text: 'test'
-    , template: 'test'
+    , template: 'testMail'
   }), {
     from: 'test@example.com'
     , to: 'test@example.com'
@@ -305,7 +305,7 @@ Tinytest.add('Mailer - Mailer resolves template metadata' , function (test) {
     , subject: 'test'
     , text: 'test'
     , html: '<p>testname</p>'
-    , template: 'test'
+    , template: 'testMail'
   });
 });
 
@@ -314,10 +314,68 @@ Tinytest.add('Mailer - Mailer stores sent emails in a collection' , function (te
   CustomMailer.config.defaultServiceProvider = null;
 
   var testId = Random.id();
-  
+
   test.equal(CustomMailer.send({
     test: testId
   })
     , CustomMailer.config.collection.findOne({test: testId})
   );
 });
+
+if (Meteor.isServer) {
+
+  Tinytest.addAsync('Mailer - Mailer.autoProcessQueue sends unsent messages which are in the mailer collection' , function (test, done) {
+    var testCollection = new Mongo.Collection('useful:mailer:testqueue');
+    var CustomMailer = Mailer.factory(null, {
+      collection: testCollection
+      , defaultServiceProvider: null
+    });
+
+    var QueueProcesser = Mailer.factory(null, {
+      collection: testCollection
+      , defaultServiceProvider: function (email) {
+        email.sent = true;
+      }
+    });
+
+    testCollection.remove({});
+    QueueProcesser.autoProcessQueue();
+
+    var sentMessage = CustomMailer.send({});
+
+    Meteor.setTimeout(function () {
+      test.equal(CustomMailer.config.collection.findOne(), _.extend(sentMessage, {sent: true}));
+      done();
+    }, 100);
+  });
+  Tinytest.addAsync('Mailer - Mailer.autoProcessQueue does not self-conflict and will not process emails twice' , function (test, done) {
+    var testCollection = new Mongo.Collection('useful:mailer:testqueue2');
+    var CustomMailer = Mailer.factory(null, {
+      collection: testCollection
+      , defaultServiceProvider: null
+    });
+
+    var count = 0;
+    var QueueProcesser = Mailer.factory(null, {
+      collection: testCollection
+      , defaultServiceProvider: function (email) {
+        console.log('sent');
+        email.sent = true;
+        count++;
+      }
+    });
+
+    testCollection.remove({});
+    QueueProcesser.autoProcessQueue();
+    QueueProcesser.autoProcessQueue();
+    QueueProcesser.autoProcessQueue();
+
+    var sentMessage = CustomMailer.send({});
+
+    Meteor.setTimeout(function () {
+      test.equal(count, 1);
+      test.equal(CustomMailer.config.collection.findOne(), _.extend(sentMessage, {sent: true}));
+      done();
+    }, 100);
+  });
+}

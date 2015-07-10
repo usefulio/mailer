@@ -83,6 +83,50 @@ function factory(Mailer, config) {
     return this.router.send(routeName, email || {}, options || {});
   };
 
+/**
+ * Sets up an observeChanges watch on the messages collection for unsent messages and sends them using the defaultServiceProvider
+ * @method Mailer.autoProcessQueue
+ */
+
+  Mailer.autoProcessQueue = function () {
+    var collection = Mailer.config.collection;
+    var watch = collection.find({
+      sent: {
+        $ne: true
+      }
+    }).observeChanges({
+      added: function (id) {
+        var transactionId = Random.id();
+        collection.update({
+          _id: id
+          , processorId: {
+            $exists: false
+          }
+          , sent: {
+            $ne: true
+          }
+        }, {
+          $set: {
+            processorId: transactionId
+          }
+        });
+
+        var doc = collection.findOne({
+          _id: id
+          , processorId: transactionId
+        });
+
+        if (doc) {
+          var sentMessage = Mailer.send('sendViaDefaultServiceProvider', doc);
+          if (sentMessage) {
+            delete sentMessage.processorId;
+            collection.update(id, sentMessage);
+          }
+        }
+      }
+    });
+  };
+
   Mailer.router.route('sendViaDefaultServiceProvider', function (email) {
     var action = Mailer.config.defaultServiceProvider;
     if (action){
