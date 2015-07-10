@@ -20,6 +20,7 @@ Package.onUse(function(api) {
   api.use('email', 'server');
   api.use('cwohlman:templating-server');
   api.imply('cwohlman:templating-server');
+  api.imply('templating');
   api.use('useful:mailer-core');
   api.imply('useful:mailer-core');
 
@@ -32,5 +33,7 @@ Package.onTest(function(api) {
   api.use('email', 'server');
   api.addFiles('test.spacebars', ['server']);
   api.addFiles('testLayout.spacebars', ['server']);
+  api.addFiles('test.html', ['client']);
+  api.addFiles('testLayout.html', ['client']);
   api.addFiles('mailer-tests.js');
 });
