@@ -101,9 +101,20 @@ function factory(Mailer, config) {
   Mailer.router.route('resolveEmailAddresses', function (email) {
     if (Mailer.config.resolveEmailAddress) {
       _.each(['from', 'to', 'cc', 'bcc', 'replyTo'], function (property) {
-        var val = Mailer.config.resolveEmailAddress(email[property] || email[property + 'Id']) || email[property];
-        if (val)
-          email[property] = val;
+        var emails = email[property] || email[property + 'Id'];
+        if (!emails)
+          return;
+        if (!_.isArray(emails))
+          emails = [emails];
+
+        emails = _.filter(_.map(emails, function (address) {
+          return Mailer.config.resolveEmailAddress(address) || address;
+        }), _.identity);
+
+        if (emails.length > 1)
+          email[property] = emails;
+        else if (emails.length > 0)
+          email[property] = emails[0];
       });
     }
   });

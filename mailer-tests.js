@@ -175,3 +175,27 @@ Tinytest.add('Mailer - Mailer resolves from, to, and replyTo addresses', functio
   });
 });
 
+Tinytest.add('Mailer - Mailer resolves arrays of addresses', function (test) {
+  var CustomMailer = Mailer.factory(null, _.pick(Mailer.config, 'resolveEmailAddress'));
+
+  var userId = Meteor.users.findOne()._id;
+
+  test.equal(CustomMailer.send({}, {
+    from: [userId, userId]
+    , to: userId
+    , cc: userId
+    , bcc: userId
+    , replyTo: userId
+    , subject: 'test'
+    , text: 'test'
+  }), {
+    from: ['test-priority@example.com', 'test-priority@example.com']
+    , to: 'test-priority@example.com'
+    , cc: 'test-priority@example.com'
+    , bcc: 'test-priority@example.com'
+    , replyTo: 'test-priority@example.com'
+    , subject: 'test'
+    , text: 'test'
+  });
+});
+
