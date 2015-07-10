@@ -159,12 +159,16 @@ Tinytest.add('Mailer - Mailer resolves from, to, and replyTo addresses', functio
   test.equal(CustomMailer.send({}, {
     from: userId
     , to: userId
+    , cc: userId
+    , bcc: userId
     , replyTo: userId
     , subject: 'test'
     , text: 'test'
   }), {
     from: 'test-priority@example.com'
     , to: 'test-priority@example.com'
+    , cc: 'test-priority@example.com'
+    , bcc: 'test-priority@example.com'
     , replyTo: 'test-priority@example.com'
     , subject: 'test'
     , text: 'test'

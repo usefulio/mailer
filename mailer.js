@@ -100,7 +100,7 @@ function factory(Mailer, config) {
 
   Mailer.router.route('resolveEmailAddresses', function (email) {
     if (Mailer.config.resolveEmailAddress) {
-      _.each(['from', 'to', 'replyTo'], function (property) {
+      _.each(['from', 'to', 'cc', 'bcc', 'replyTo'], function (property) {
         var val = Mailer.config.resolveEmailAddress(email[property] || email[property + 'Id']) || email[property];
         if (val)
           email[property] = val;
