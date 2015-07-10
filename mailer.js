@@ -150,7 +150,14 @@ function factory(Mailer, config) {
 
   });
 
-  Mailer.router.route('default', resolvePropertyValues, 'attachDefaultMetadata', 'resolveUserPreferences', 'resolveEmailAddresses', 'resolveTemplates', 'sendViaDefaultServiceProvider');
+  Mailer.router.route('insertSentMessages', function (email) {
+    if (Mailer.config.collection) {
+      var messageId = Mailer.config.collection.insert(email);
+      return Mailer.config.collection.findOne(messageId);
+    }
+  });
+
+  Mailer.router.route('default', resolvePropertyValues, 'attachDefaultMetadata', 'resolveUserPreferences', 'resolveEmailAddresses', 'resolveTemplates', 'sendViaDefaultServiceProvider', 'insertSentMessages');
 
   return Mailer;
 }
@@ -252,5 +259,6 @@ Meteor.startup(function () {
           return Meteor.users.findOne(email.toId);
         }
       }
+      , collection: new Mongo.Collection('useful:mailer:messages')
     });
 });

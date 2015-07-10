@@ -308,3 +308,16 @@ Tinytest.add('Mailer - Mailer resolves template metadata' , function (test) {
     , template: 'test'
   });
 });
+
+Tinytest.add('Mailer - Mailer stores sent emails in a collection' , function (test) {
+  var CustomMailer = Mailer.factory(null, _.pick(Mailer.config, 'collection'));
+  CustomMailer.config.defaultServiceProvider = null;
+
+  var testId = Random.id();
+  
+  test.equal(CustomMailer.send({
+    test: testId
+  })
+    , CustomMailer.config.collection.findOne({test: testId})
+  );
+});
