@@ -322,6 +322,36 @@ Tinytest.add('Mailer - Mailer stores sent emails in a collection' , function (te
   );
 });
 
+Tinytest.add('Mailer - Mailer resolves threading properties' , function (test) {
+  var CustomMailer = Mailer.factory(null, _.pick(Mailer.config, 'metadata', 'resolveEmailAddress'));
+  CustomMailer.config.defaultServiceProvider = null;
+  CustomMailer.config.threading = {
+    from: function (from, email) {
+      return 'notifications@example.com';
+    }
+    , threadId: function (threadId, email) {
+      return [email.fromId, email.toId].join('_');
+    }
+    , replyTo: function (replyTo, email) {
+      return email.threadId + "+" + email.fromId + "@example.com";
+    }
+  };
+
+  var userId = Meteor.users.findOne()._id;
+
+  test.equal(CustomMailer.send({
+    fromId: '123'
+    , toId: userId
+  }), {
+    fromId: '123'
+    , toId: userId
+    , threadId: '123_' + userId
+    , from: 'notifications@example.com'
+    , to: 'test-priority@example.com'
+    , replyTo: "123_" + userId + "+123@example.com"
+  });
+});
+
 if (Meteor.isServer) {
 
   Tinytest.addAsync('Mailer - Mailer.autoProcessQueue sends unsent messages which are in the mailer collection' , function (test, done) {

@@ -7,8 +7,9 @@ function resolvePropertyValues(email) {
   _.each(this.options, function (val, property) {
     if (_.isFunction(val)) {
       val = val.call(this, email[property], email);
-    } 
-    if (!email[property] && val)
+      if (val)
+        email[property] = val;
+    } else if (!email[property] && val)
       email[property] = val;
   });
 
@@ -201,7 +202,15 @@ function factory(Mailer, config) {
     }
   });
 
-  Mailer.router.route('default', resolvePropertyValues, 'attachDefaultMetadata', 'resolveUserPreferences', 'resolveEmailAddresses', 'resolveTemplates', 'sendViaDefaultServiceProvider', 'insertSentMessages');
+  Mailer.router.route('attachThreadingMetadata', function (email) {
+    if (Mailer.config.threading) {
+      var options = _.pick(Mailer.config.threading, 'threadId', 'from', 'replyTo');
+      return resolvePropertyValues.call({options: options}, email);
+    }
+
+  });
+
+  Mailer.router.route('default', resolvePropertyValues, 'attachDefaultMetadata', 'resolveUserPreferences', 'resolveEmailAddresses', 'attachThreadingMetadata', 'resolveTemplates', 'sendViaDefaultServiceProvider', 'insertSentMessages');
 
   return Mailer;
 }
