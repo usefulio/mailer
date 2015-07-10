@@ -88,7 +88,7 @@ function factory(Mailer, config) {
     if (action){
       return action.call(this, email);
     }
-    else
+    else if (action !== null)
       console.log("Email sending not enabled! To enable sending define a defaultServiceProvider in your mailer config.");
   });
 

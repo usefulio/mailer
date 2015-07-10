@@ -7,6 +7,8 @@ if (Meteor.isServer) {
 Tinytest.add('Mailer - Mailer.send should resolve properties', function (test) {
   var CustomMailer = {};
   Mailer.factory(CustomMailer, { });
+
+  CustomMailer.config.defaultServiceProvider = null;
   test.equal(CustomMailer.send({
     from: function () { return 'test@example.com'; }
     , to: function () { return 'test@example.com'; }
@@ -23,6 +25,8 @@ Tinytest.add('Mailer - Mailer.send should resolve properties', function (test) {
 Tinytest.add('Mailer - Mailer.send should resolve options', function (test) {
   var CustomMailer = {};
   Mailer.factory(CustomMailer, { });
+
+  CustomMailer.config.defaultServiceProvider = null;
   test.equal(CustomMailer.send({}, {
     from: function () { return 'test@example.com'; }
     , to: function () { return 'test@example.com'; }
@@ -39,6 +43,8 @@ Tinytest.add('Mailer - Mailer.send should resolve options', function (test) {
 Tinytest.add('Mailer - Mailer.send should resolve defaults', function (test) {
   var CustomMailer = {};
   Mailer.factory(CustomMailer, { });
+
+  CustomMailer.config.defaultServiceProvider = null;
   test.equal(CustomMailer.send({}, {
     from: 'test@example.com'
     , to: 'test@example.com'
@@ -145,6 +151,8 @@ if (Meteor.isServer) {
 Tinytest.add('Mailer - Mailer sets some default metadata', function (test) {
   var CustomMailer = Mailer.factory(null, _.pick(Mailer.config, 'metadata'));
 
+  CustomMailer.config.defaultServiceProvider = null;
+
   var userId = Meteor.users.findOne()._id;
 
   test.equal(CustomMailer.send({}, {
@@ -164,6 +172,8 @@ Tinytest.add('Mailer - Mailer sets some default metadata', function (test) {
 
 Tinytest.add('Mailer - Mailer resolves from, to, and replyTo addresses correctly', function (test) {
   var CustomMailer = Mailer.factory(null, _.pick(Mailer.config, 'resolveEmailAddress'));
+
+  CustomMailer.config.defaultServiceProvider = null;
 
   var userId = Meteor.users.findOne()._id;
 
@@ -189,6 +199,8 @@ Tinytest.add('Mailer - Mailer resolves from, to, and replyTo addresses correctly
 Tinytest.add('Mailer - Mailer resolves arrays of addresses', function (test) {
   var CustomMailer = Mailer.factory(null, _.pick(Mailer.config, 'resolveEmailAddress'));
 
+  CustomMailer.config.defaultServiceProvider = null;
+
   var userId = Meteor.users.findOne()._id;
 
   test.equal(CustomMailer.send({}, {
@@ -213,6 +225,8 @@ Tinytest.add('Mailer - Mailer resolves arrays of addresses', function (test) {
 Tinytest.add('Mailer - Mailer rejects messages which do not pass the user notification preferences check' , function (test) {
   var CustomMailer = Mailer.factory(null, _.pick(Mailer.config, 'metadata', 'resolveUserPreferences'));
 
+  CustomMailer.config.defaultServiceProvider = null;
+
   var userId = Meteor.users.findOne()._id;
 
   test.equal(CustomMailer.send({
@@ -227,6 +241,8 @@ Tinytest.add('Mailer - Mailer rejects messages which do not pass the user notifi
 if (Meteor.isServer) {
   Tinytest.add('Mailer - Mailer resolves templates when sending email' , function (test) {
     var CustomMailer = Mailer.factory(null, _.pick(Mailer.config, 'resolveTemplates'));
+
+    CustomMailer.config.defaultServiceProvider = null;
 
     var userId = Meteor.users.findOne()._id;
 
@@ -247,6 +263,8 @@ if (Meteor.isServer) {
   });
   Tinytest.add('Mailer - Mailer resolves layout' , function (test) {
     var CustomMailer = Mailer.factory(null, _.pick(Mailer.config, 'resolveTemplates'));
+
+    CustomMailer.config.defaultServiceProvider = null;
 
     var userId = Meteor.users.findOne()._id;
 
@@ -269,6 +287,8 @@ if (Meteor.isServer) {
   });
   Tinytest.add('Mailer - Mailer resolves template metadata' , function (test) {
     var CustomMailer = Mailer.factory(null, _.pick(Mailer.config, 'metadata', 'resolveTemplates', 'templateMetadata'));
+
+    CustomMailer.config.defaultServiceProvider = null;
 
     var userId = Meteor.users.findOne()._id;
 
