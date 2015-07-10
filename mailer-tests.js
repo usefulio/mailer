@@ -104,6 +104,47 @@ Tinytest.add('Mailer - Mailer.config.defaultServiceProvider will overwrite the d
     , text: 'test'
     , customSend: true
   });
+});
 
+if (Meteor.isServer) {
+  // Clear out any old users
+  Meteor.users.remove({});
+
+  // Create a dummy user to interact with
+  var user = Meteor.users.insert({
+    emails: [
+      {
+        address: 'test@example.com'
+      }
+    ]
+  });
+
+  Meteor.publish(null, function () {
+    return Meteor.users.find();
+  });
+} else {
+
+}
+
+
+
+Tinytest.add('Mailer - Mailer sets some default metadata', function (test) {
+  var CustomMailer = Mailer.factory(null, _.pick(Mailer.config, 'metadata'));
+
+  var user = Meteor.users.findOne()._id;
+  
+  test.equal(CustomMailer.send({}, {
+    from: 'test@example.com'
+    , to: 'test@example.com'
+    , subject: 'test'
+    , text: 'test'
+  }), {
+    from: 'test@example.com'
+    , to: 'test@example.com'
+    , fromId: user
+    , toId: user
+    , subject: 'test'
+    , text: 'test'
+  });
 });
 

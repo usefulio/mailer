@@ -6,8 +6,8 @@ function resolvePropertyValues(email) {
   
   _.each(this.options, function (val, property) {
     if (_.isFunction(val)) {
-      val = val.call(this, email);
-    }
+      val = val.call(this, email[property], email);
+    } 
     if (!email[property] && val)
       email[property] = val;
   });
@@ -92,7 +92,13 @@ function factory(Mailer, config) {
       console.log("Email sending not enabled! To enable sending define a defaultServiceProvider in your mailer config.");
   });
 
-  Mailer.router.route('default', resolvePropertyValues, 'sendViaDefaultServiceProvider');
+  Mailer.router.route('attachDefaultMetadata', function (email) {
+    if (Mailer.config.metadata)
+      return resolvePropertyValues.call({options: Mailer.config.metadata}, email);
+
+  });
+
+  Mailer.router.route('default', resolvePropertyValues, 'attachDefaultMetadata', 'sendViaDefaultServiceProvider');
 
   return Mailer;
 }
@@ -107,5 +113,39 @@ Meteor.startup(function () {
           email.sent = true;
           return email;
         } : null
+      , metadata: {
+        fromId: function (fromId, email) {
+          if (fromId)
+            return fromId;
+
+          var user = Meteor.users.findOne({
+            $or: [
+              {
+                _id: email.from
+              }
+              , {
+                "emails.address": email.from
+              }
+            ]
+          });
+          return user && user._id;
+        }
+        , toId: function (toId, email) {
+          if (toId)
+            return toId;
+
+          var user = Meteor.users.findOne({
+            $or: [
+              {
+                _id: email.to
+              }
+              , {
+                "emails.address": email.to
+              }
+            ]
+          });
+          return user && user._id;
+        }
+      }
     });
 });
