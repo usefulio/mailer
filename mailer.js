@@ -207,7 +207,16 @@ function factory(Mailer, config) {
       var options = _.pick(Mailer.config.threading, 'threadId', 'from', 'replyTo');
       return resolvePropertyValues.call({options: options}, email);
     }
+  });
 
+  Mailer.router.route('recieve', function (email) {
+    if (Mailer.config.threading && Mailer.config.threading.setOutboundProperties) {
+      Mailer.config.threading.setOutboundProperties(email);
+    } else
+      return false;
+  }, function (email) {
+    if (Mailer.config.threading && Mailer.config.threading.onRecieveRoute)
+      return Mailer.send(Mailer.config.threading.onRecieveRoute, email);
   });
 
   Mailer.router.route('default', resolvePropertyValues, 'attachDefaultMetadata', 'resolveUserPreferences', 'resolveEmailAddresses', 'attachThreadingMetadata', 'resolveTemplates', 'sendViaDefaultServiceProvider', 'insertSentMessages');

@@ -353,6 +353,43 @@ Tinytest.add('Mailer - Mailer resolves threading properties' , function (test) {
   });
 });
 
+Tinytest.add('Mailer - Mailer should store and forward recieved emails' , function (test) {
+  var CustomMailer = Mailer.factory(null, _.pick(Mailer.config, 'metadata', 'resolveEmailAddress'));
+  CustomMailer.config.defaultServiceProvider = null;
+  CustomMailer.config.threading = {
+    threadId: function (threadId, email) {
+      return threadId || [email.fromId, email.toId].join('_');
+    }
+    , from: function (from, email) {
+      return email.threadId ? 'notifications@example.com' : from;
+    }
+    , replyTo: function (replyTo, email) {
+      return replyTo || email.threadId + "+" + email.fromId + "@example.com";
+    }
+    , setOutboundProperties: function (email) {
+      var parts = email.to.match(/([a-z0-9]+_[a-z0-9]+)\+([a-z0-9]+)@/i);
+      email.threadId = parts[1];
+      email.toId = parts[2];
+      delete email.to;
+    }
+    , onRecieveRoute: 'default'
+  };
+
+  var userId = Meteor.users.findOne()._id;
+
+  test.equal(CustomMailer.send('recieve', {
+    from: 'test-priority@example.com'
+    , to: "123_" + userId + "+123@example.com"
+  }), {
+    toId: '123'
+    , fromId: userId
+    , threadId: '123_' + userId
+    , from: 'notifications@example.com'
+    , to: '123'
+    , replyTo: "123_" + userId + "+" + userId + "@example.com"
+  });
+});
+
 if (Meteor.isServer) {
 
   Tinytest.addAsync('Mailer - Mailer.autoProcessQueue sends unsent messages which are in the mailer collection' , function (test, done) {
