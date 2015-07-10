@@ -98,7 +98,17 @@ function factory(Mailer, config) {
 
   });
 
-  Mailer.router.route('default', resolvePropertyValues, 'attachDefaultMetadata', 'sendViaDefaultServiceProvider');
+  Mailer.router.route('resolveEmailAddresses', function (email) {
+    if (Mailer.config.resolveEmailAddress) {
+      _.each(['from', 'to', 'replyTo'], function (property) {
+        var val = Mailer.config.resolveEmailAddress(email[property] || email[property + 'Id']) || email[property];
+        if (val)
+          email[property] = val;
+      });
+    }
+  });
+
+  Mailer.router.route('default', resolvePropertyValues, 'attachDefaultMetadata', 'resolveEmailAddresses', 'sendViaDefaultServiceProvider');
 
   return Mailer;
 }
@@ -145,6 +155,17 @@ Meteor.startup(function () {
             ]
           });
           return user && user._id;
+        }
+      }
+      , resolveEmailAddress: function (address) {
+        var user = Meteor.users.findOne(address);
+        if (user) {
+          var email = _.find(user.emails, function (email) {
+            return email.preferred;
+          }) || _.first(user.emails);
+          return email && email.address || address;
+        } else {
+          return address;
         }
       }
     });

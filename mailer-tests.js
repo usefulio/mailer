@@ -115,6 +115,11 @@ if (Meteor.isServer) {
     emails: [
       {
         address: 'test@example.com'
+        , verified: true
+      }
+      , {
+        address: 'test-priority@example.com'
+        , preferred: true
       }
     ]
   });
@@ -126,13 +131,11 @@ if (Meteor.isServer) {
 
 }
 
-
-
 Tinytest.add('Mailer - Mailer sets some default metadata', function (test) {
   var CustomMailer = Mailer.factory(null, _.pick(Mailer.config, 'metadata'));
 
-  var user = Meteor.users.findOne()._id;
-  
+  var userId = Meteor.users.findOne()._id;
+
   test.equal(CustomMailer.send({}, {
     from: 'test@example.com'
     , to: 'test@example.com'
@@ -141,8 +144,28 @@ Tinytest.add('Mailer - Mailer sets some default metadata', function (test) {
   }), {
     from: 'test@example.com'
     , to: 'test@example.com'
-    , fromId: user
-    , toId: user
+    , fromId: userId
+    , toId: userId
+    , subject: 'test'
+    , text: 'test'
+  });
+});
+
+Tinytest.add('Mailer - Mailer resolves from, to, and replyTo addresses', function (test) {
+  var CustomMailer = Mailer.factory(null, _.pick(Mailer.config, 'resolveEmailAddress'));
+
+  var userId = Meteor.users.findOne()._id;
+
+  test.equal(CustomMailer.send({}, {
+    from: userId
+    , to: userId
+    , replyTo: userId
+    , subject: 'test'
+    , text: 'test'
+  }), {
+    from: 'test-priority@example.com'
+    , to: 'test-priority@example.com'
+    , replyTo: 'test-priority@example.com'
     , subject: 'test'
     , text: 'test'
   });
