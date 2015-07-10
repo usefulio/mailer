@@ -294,7 +294,7 @@ Tinytest.add('Mailer - Mailer resolves template metadata' , function (test) {
   test.equal(CustomMailer.send({
     from: 'test@example.com'
     , to: 'test@example.com'
-    , subject: 'test'
+    , subjectTemplate: '{{text}}'
     , text: 'test'
     , template: 'testMail'
   }), {
@@ -306,6 +306,7 @@ Tinytest.add('Mailer - Mailer resolves template metadata' , function (test) {
     , text: 'test'
     , html: '<p>testname</p>'
     , template: 'testMail'
+    , subjectTemplate: '{{text}}'
   });
 });
 

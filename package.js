@@ -15,6 +15,7 @@ Npm.depends({ "stream-buffers": "0.2.5" });
 
 Package.onUse(function(api) {
   api.versionsFrom('1.1.0.2');
+  api.use('spacebars-compiler');
   api.use('underscore');
   api.use('accounts-base');
   api.use('email', 'server');
@@ -23,6 +24,7 @@ Package.onUse(function(api) {
   api.use('useful:mailer-core');
   api.imply('useful:mailer-core');
 
+  api.addFiles('spacebars.js');
   api.addFiles('mailer.js');
 });
 

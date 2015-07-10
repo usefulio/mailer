@@ -286,13 +286,13 @@ Meteor.startup(function () {
       , resolveTemplates: function (email) {
         var template = Template[email.template];
         var layoutTemplate = Template[email.layoutTemplate];
+        var dataContext = _.extend({}, email);
+        if (this.templateMetadata) {
+          _.each(this.templateMetadata, function (fn, property) {
+            dataContext[property] = _.isFunction(fn) ? fn(email) : fn;
+          });
+        }
         if (template) {
-          var dataContext = _.extend({}, email);
-          if (this.templateMetadata) {
-            _.each(this.templateMetadata, function (fn, property) {
-              dataContext[property] = _.isFunction(fn) ? fn(email) : fn;
-            });
-          }
           if (layoutTemplate) {
             layoutTemplate.helpers({
               yield: function () {
@@ -302,6 +302,10 @@ Meteor.startup(function () {
             email.html = Blaze.toHTMLWithData(layoutTemplate, dataContext);
           } else
             email.html = Blaze.toHTMLWithData(template, dataContext);
+        }
+        var subjectTemplate = email.subjectTemplate;
+        if (subjectTemplate) {
+          email.subject = compileAndRender(subjectTemplate, dataContext);
         }
       }
       , templateMetadata: {
