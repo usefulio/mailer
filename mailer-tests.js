@@ -127,6 +127,9 @@ if (Meteor.isServer) {
         , verified: true
       }
     ]
+    , notifications: {
+      optional: false
+    }
   });
 
   Meteor.publish(null, function () {
@@ -202,4 +205,18 @@ Tinytest.add('Mailer - Mailer resolves arrays of addresses', function (test) {
     , subject: 'test'
     , text: 'test'
   });
+});
+
+Tinytest.add('Mailer - Mailer rejects messages which do not pass the user notification preferences check' , function (test) {
+  var CustomMailer = Mailer.factory(null, _.pick(Mailer.config, 'metadata', 'resolveUserPreferences'));
+
+  var userId = Meteor.users.findOne()._id;
+
+  test.equal(CustomMailer.send({
+    from: 'test@example.com'
+    , to: 'test@example.com'
+    , subject: 'test'
+    , text: 'test'
+    , optional: true
+  }), null);
 });

@@ -119,7 +119,32 @@ function factory(Mailer, config) {
     }
   });
 
-  Mailer.router.route('default', resolvePropertyValues, 'attachDefaultMetadata', 'resolveEmailAddresses', 'sendViaDefaultServiceProvider');
+  Mailer.router.route('resolveUserPreferences', function (email) {
+    if (Mailer.config.resolveUserPreferences) {
+      _.each(['to', 'cc', 'bcc', 'replyTo'], function (property) {
+        var emails = email[property + 'Id'];
+        if (!emails)
+          return;
+        if (!_.isArray(emails))
+          emails = [emails];
+
+        emails = _.filter(emails, function (address) {
+          return Mailer.config.resolveUserPreferences(address, email);
+        });
+
+        if (emails.length > 1)
+          email[property] = emails;
+        else if (emails.length > 0)
+          email[property] = emails[0];
+        else
+          delete email[property];
+      });
+      if (!email.to)
+        return false;
+    }
+  });
+
+  Mailer.router.route('default', resolvePropertyValues, 'attachDefaultMetadata', 'resolveUserPreferences', 'resolveEmailAddresses', 'sendViaDefaultServiceProvider');
 
   return Mailer;
 }
@@ -178,6 +203,19 @@ Meteor.startup(function () {
         } else {
           return address;
         }
+      }
+      , resolveUserPreferences: function (recipient, email) {
+        var user = Meteor.users.findOne(recipient);
+        if (user && user.notifications) {
+          return _.all(user.notifications, function (optin, property) {
+            if (!optin && email[property])
+              return false;
+            else
+              return true;
+          });
+        } else
+          // No user preferences, send the email anyway
+          return true;
       }
     });
 });
