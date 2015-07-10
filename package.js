@@ -20,15 +20,22 @@ Package.onUse(function(api) {
 
     api.addFiles([
         'lib/constants.js'
+        , 'lib/collections/mailerRoutes.js'
         , 'lib/mailer.js'
     ]);
     api.addFiles([
         'server/methods/send.js'
+        , 'server/methods/addRoute.js'
+        , 'server/methods/getRoute.js'
     ], 'server');
 
     api.export([
         'Mailer'
+        , 'MailerRoutes'
         , 'MAILER_METHOD_SEND'
+        , 'MAILER_METHOD_ADD_ROUTE'
+        , 'MAILER_METHOD_GET_ROUTE'
+        , 'MAILER_COLLECTION_ROUTES'
     ]);
 });
 

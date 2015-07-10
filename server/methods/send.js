@@ -2,7 +2,7 @@ var methods = {};
 
 methods[MAILER_METHOD_SEND] = function (options) {
     // XXX defaults to Meteor's email package for now
-    check([options.to, options.from, options.subject, options.message], [String]);
+    check([options.to, options.from, options.subject, options.html], [String]);
 
     this.unblock();
 
@@ -10,7 +10,7 @@ methods[MAILER_METHOD_SEND] = function (options) {
       to: options.to
       , from: options.from
       , subject: options.subject
-      , text: options.message
+      , text: options.html
     });
 
     return true;
