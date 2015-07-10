@@ -171,7 +171,7 @@ Meteor.startup(function () {
       , resolveEmailAddress: function (address) {
         var user = Meteor.users.findOne(address);
         if (user) {
-          var email = _.find(user.emails, function (email) {
+          var email = _.find(_.where(user.emails, {verified: true}), function (email) {
             return email.preferred;
           }) || _.first(user.emails);
           return email && email.address || address;

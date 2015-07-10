@@ -118,8 +118,13 @@ if (Meteor.isServer) {
         , verified: true
       }
       , {
+        address: 'test-none@example.com'
+        , preferred: true
+      }
+      , {
         address: 'test-priority@example.com'
         , preferred: true
+        , verified: true
       }
     ]
   });
@@ -151,7 +156,7 @@ Tinytest.add('Mailer - Mailer sets some default metadata', function (test) {
   });
 });
 
-Tinytest.add('Mailer - Mailer resolves from, to, and replyTo addresses', function (test) {
+Tinytest.add('Mailer - Mailer resolves from, to, and replyTo addresses correctly', function (test) {
   var CustomMailer = Mailer.factory(null, _.pick(Mailer.config, 'resolveEmailAddress'));
 
   var userId = Meteor.users.findOne()._id;
@@ -198,4 +203,3 @@ Tinytest.add('Mailer - Mailer resolves arrays of addresses', function (test) {
     , text: 'test'
   });
 });
-
