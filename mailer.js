@@ -3,10 +3,12 @@ function resolvePropertyValues(email) {
     if (_.isFunction(val))
       email[property] = val.call(this, email);
   });
+  
   _.each(this.options, function (val, property) {
-    if (_.isFunction(val))
-      email[property] = val.call(this, email);
-    else if (!email[property])
+    if (_.isFunction(val)) {
+      val = val.call(this, email);
+    }
+    if (!email[property] && val)
       email[property] = val;
   });
 
@@ -45,7 +47,7 @@ Mailer.route = function (routeName, actionOrOptions, parentRoute) {
   if (_.isFunction(actionOrOptions))
     return Mailer.router.route(routeName, actionOrOptions, parentRoute);
   else
-    return Mailer.router.route(routeName, resolvePropertyValues, actionOrOptions, parentRoute);
+    return Mailer.router.route(routeName, [resolvePropertyValues, actionOrOptions], parentRoute);
 };
 
 /**
