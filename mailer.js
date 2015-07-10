@@ -15,13 +15,28 @@ function resolvePropertyValues(email) {
   return email;
 }
 
+var Router = Mailer.Router;
+
+function factory(Mailer, config) {
+
+  if (!Mailer)
+    Mailer = {};
+
+/**
+ * The configuration options for this mailer
+ * @property Mailer.config An object containing options for the mailer
+ * @type {object}
+ */
+
+  Mailer.config = config;
+
 /**
  * The default router to use for sending email
- * @property router An instance of Mailer.Router
+ * @property Mailer.router An instance of Mailer.Router
  * @type {emailRouter}
  */
 
-Mailer.router = new Mailer.Router();
+  Mailer.router = new Router();
 
 /**
  * Create a new route for sending email
@@ -42,13 +57,13 @@ Mailer.router = new Mailer.Router();
  * @param {string} parentRoute The name of the parent route, in case you have multiple email sending routines.
  */
 
-Mailer.route = function (routeName, actionOrOptions, parentRoute) {
-  parentRoute = parentRoute || 'default';
-  if (_.isFunction(actionOrOptions))
-    return Mailer.router.route(routeName, actionOrOptions, parentRoute);
-  else
-    return Mailer.router.route(routeName, [resolvePropertyValues, actionOrOptions], parentRoute);
-};
+  Mailer.route = function (routeName, actionOrOptions, parentRoute) {
+    parentRoute = parentRoute || 'default';
+    if (_.isFunction(actionOrOptions))
+      return Mailer.router.route(routeName, actionOrOptions, parentRoute);
+    else
+      return Mailer.router.route(routeName, [resolvePropertyValues, actionOrOptions], parentRoute);
+  };
 
 /**
  * Send an email using the named route, or the default route
@@ -59,37 +74,38 @@ Mailer.route = function (routeName, actionOrOptions, parentRoute) {
  * 
  */
 
-Mailer.send = function (routeName, email, options) {
-  if (!_.isString(routeName)) {
-    options = email;
-    email = routeName;
-    routeName = 'default';
-  }
-  return this.router.send(routeName, email || {}, options || {});
-};
+  Mailer.send = function (routeName, email, options) {
+    if (!_.isString(routeName)) {
+      options = email;
+      email = routeName;
+      routeName = 'default';
+    }
+    return this.router.send(routeName, email || {}, options || {});
+  };
 
-if (Meteor.isServer) {
-  Mailer._defaultServiceProvider = function (email) {
-    Email.send(email);
-    email.sent = true;
-    return email;
-  };
-} else {
-  Mailer._defaultServiceProvider = function (email) {
-    console.log("You do not have an email service provider set. To enable sending call Mailer.setDefaultServiceProvider()");
-    email.sent = true;
-    return email;
-  };
+  Mailer.router.route('sendViaDefaultServiceProvider', function (email) {
+    var action = Mailer.config.defaultServiceProvider;
+    if (action){
+      return action.call(this, email);
+    }
+    else
+      console.log("Email sending not enabled! To enable sending define a defaultServiceProvider in your mailer config.");
+  });
+
+  Mailer.router.route('default', resolvePropertyValues, 'sendViaDefaultServiceProvider');
+
+  return Mailer;
 }
 
-Mailer.setDefaultServiceProvider = function (provider) {
-  Mailer._defaultServiceProvider = provider;
-};
+Mailer.factory = factory;
 
-Mailer.router.route('sendViaDefaultServiceProvider', function (email) {
-  return Mailer._defaultServiceProvider(email);
+Meteor.startup(function () {
+  if (!Mailer.send)
+    factory(Mailer, {
+      defaultServiceProvider: Meteor.isServer ? function (email) {
+          Email.send(email);
+          email.sent = true;
+          return email;
+        } : null
+    });
 });
-
-Mailer.router.route('default', resolvePropertyValues, 'sendViaDefaultServiceProvider');
-
-

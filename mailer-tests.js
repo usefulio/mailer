@@ -5,7 +5,9 @@ if (Meteor.isServer) {
 }
 
 Tinytest.add('Mailer - Mailer.send should resolve properties', function (test) {
-  test.equal(Mailer.send({
+  var CustomMailer = {};
+  Mailer.factory(CustomMailer, { });
+  test.equal(CustomMailer.send({
     from: function () { return 'test@example.com'; }
     , to: function () { return 'test@example.com'; }
     , subject: function () { return 'test'; }
@@ -15,12 +17,13 @@ Tinytest.add('Mailer - Mailer.send should resolve properties', function (test) {
     , to: 'test@example.com'
     , subject: 'test'
     , text: 'test'
-    , sent: true
   });
 });
 
 Tinytest.add('Mailer - Mailer.send should resolve options', function (test) {
-  test.equal(Mailer.send({}, {
+  var CustomMailer = {};
+  Mailer.factory(CustomMailer, { });
+  test.equal(CustomMailer.send({}, {
     from: function () { return 'test@example.com'; }
     , to: function () { return 'test@example.com'; }
     , subject: function () { return 'test'; }
@@ -30,12 +33,13 @@ Tinytest.add('Mailer - Mailer.send should resolve options', function (test) {
     , to: 'test@example.com'
     , subject: 'test'
     , text: 'test'
-    , sent: true
   });
 });
 
 Tinytest.add('Mailer - Mailer.send should resolve defaults', function (test) {
-  test.equal(Mailer.send({}, {
+  var CustomMailer = {};
+  Mailer.factory(CustomMailer, { });
+  test.equal(CustomMailer.send({}, {
     from: 'test@example.com'
     , to: 'test@example.com'
     , subject: 'test'
@@ -45,7 +49,6 @@ Tinytest.add('Mailer - Mailer.send should resolve defaults', function (test) {
     , to: 'test@example.com'
     , subject: 'test'
     , text: 'test'
-    , sent: true
   });
 });
 
@@ -82,15 +85,14 @@ if (Meteor.isServer) {
   });
 }
 
-Tinytest.add('Mailer - Mailer.setDefaultServiceProvider will overwrite the default service provider', function (test) {
-  var provider = Mailer._defaultServiceProvider;
-
-  Mailer.setDefaultServiceProvider(function (email) {
-    email.customSend = true;
-    return email;
+Tinytest.add('Mailer - Mailer.config.defaultServiceProvider will overwrite the default service provider', function (test) {
+  var CustomMailer = Mailer.factory(null, {
+    defaultServiceProvider: function (email) {
+      email.customSend = true;
+    }
   });
 
-  test.equal(Mailer.send({}, {
+  test.equal(CustomMailer.send({}, {
     from: 'test@example.com'
     , to: 'test@example.com'
     , subject: 'test'
@@ -103,6 +105,5 @@ Tinytest.add('Mailer - Mailer.setDefaultServiceProvider will overwrite the defau
     , customSend: true
   });
 
-  Mailer._defaultServiceProvider = provider;
 });
 
