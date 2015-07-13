@@ -16,6 +16,14 @@ function resolvePropertyValues(email) {
   return email;
 }
 
+function getPrettyAddress(address, name) {
+  if (_.isString(name)) {
+    return '"' + name.replace(/[^a-z0-9!#$%&'*+\-\/=?\^_`{|}~ ]/ig, "") + '" <' + address + '>';
+  } else {
+    return address;
+  }
+}
+
 var Router = Mailer.Router;
 
 function factory(Mailer, config) {
@@ -144,7 +152,7 @@ function factory(Mailer, config) {
   });
 
   Mailer.router.route('resolveEmailAddresses', function (email) {
-    if (Mailer.config.resolveEmailAddress) {
+    if (Mailer.config.resolveEmailAddress || Mailer.config.resolveAddressName) {
       _.each(['from', 'to', 'cc', 'bcc', 'replyTo'], function (property) {
         var emails = email[property] || email[property + 'Id'];
         if (!emails)
@@ -152,9 +160,16 @@ function factory(Mailer, config) {
         if (!_.isArray(emails))
           emails = [emails];
 
-        emails = _.filter(_.map(emails, function (address) {
-          return Mailer.config.resolveEmailAddress(address) || address;
-        }), _.identity);
+        if (Mailer.config.resolveEmailAddress)
+          emails = _.filter(_.map(emails, function (address) {
+            return Mailer.config.resolveEmailAddress(address) || address;
+          }), _.identity);
+
+        if (Mailer.config.resolveAddressName)
+          emails = _.map(emails, function (address) {
+            var name = Mailer.config.resolveAddressName(address, email);
+            return getPrettyAddress(address, name);
+          });
 
         if (emails.length > 1)
           email[property] = emails;
@@ -277,6 +292,12 @@ Meteor.startup(function () {
         } else {
           return address;
         }
+      }
+      , resolveAddressName: function (address) {
+        var user = Meteor.users.findOne({
+          "emails.address": address
+        });
+        return user && user.profile && user.profile.name;
       }
       , resolveUserPreferences: function (recipient, email) {
         var user = Meteor.users.findOne(recipient);

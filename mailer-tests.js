@@ -222,6 +222,28 @@ Tinytest.add('Mailer - Mailer resolves arrays of addresses', function (test) {
   });
 });
 
+Tinytest.add('Mailer - Mailer resolves address name', function (test) {
+  var CustomMailer = Mailer.factory(null, _.pick(Mailer.config, 'resolveEmailAddress', 'resolveAddressName'));
+
+  CustomMailer.config.defaultServiceProvider = null;
+
+  var userId = Meteor.users.findOne()._id;
+
+  test.equal(CustomMailer.send({}, {
+    from: userId
+    , to: userId
+    , replyTo: 'notifications@example.com'
+    , subject: 'test'
+    , text: 'test'
+  }), {
+    from: '"name" <test-priority@example.com>'
+    , to: '"name" <test-priority@example.com>'
+    , replyTo: 'notifications@example.com'
+    , subject: 'test'
+    , text: 'test'
+  });
+});
+
 Tinytest.add('Mailer - Mailer rejects messages which do not pass the user notification preferences check' , function (test) {
   var CustomMailer = Mailer.factory(null, _.pick(Mailer.config, 'metadata', 'resolveUserPreferences'));
 
