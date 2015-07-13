@@ -212,8 +212,7 @@ function factory(Mailer, config) {
   Mailer.router.route('recieve', function (email) {
     if (Mailer.config.threading && Mailer.config.threading.setOutboundProperties) {
       Mailer.config.threading.setOutboundProperties(email);
-    } else
-      return false;
+    }
   }, function (email) {
     if (Mailer.config.threading && Mailer.config.threading.onRecieveRoute)
       return Mailer.send(Mailer.config.threading.onRecieveRoute, email);
