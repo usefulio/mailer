@@ -24,6 +24,11 @@ function getPrettyAddress(address, name) {
   }
 }
 
+Mailer.helpers = {
+  resolvePropertyValues: resolvePropertyValues
+  , getPrettyAddress: getPrettyAddress
+};
+
 var Router = Mailer.Router;
 
 function factory(Mailer, config) {
