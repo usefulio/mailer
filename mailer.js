@@ -286,6 +286,9 @@ Meteor.startup(function () {
           });
           return user && user._id;
         }
+        , sentAt: function () {
+          return new Date();
+        }
       }
       , resolveEmailAddress: function (address) {
         var user = Meteor.users.findOne(address);
