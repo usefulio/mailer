@@ -22,10 +22,11 @@ Package.onUse(function(api) {
   api.use('cwohlman:templating-server');
   api.imply('cwohlman:templating-server');
   api.use('useful:mailer-core');
-  api.imply('useful:mailer-core');
 
   api.addFiles('spacebars.js');
   api.addFiles('mailer.js');
+
+  api.export('Mailer');
 });
 
 Package.onTest(function(api) {
