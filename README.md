@@ -1,44 +1,52 @@
-# useful:mailer
+# Useful Mailer
 
-_This is a work in progress. The Readme will evolve as work progresses._
+We wanted a package to make email in meteor easy, this is that package.
 
-Makes the pattern for sending real emails as well understood and easily accomplished as creating a new page in an app.
+**This package is still a work in progress!**
 
-## Example Configuration and Use _(not complete)_
+# Quick Start
 
-1. Add defaults to your settings json file
+If you just want to send emails, add the `useful:mailer` package and sent a MAIL_URL in your environment, then send emails like so:
 
 ```
-{
-    "public": {
-        "mailer": {
-            "default": {
-                "domain": "<some default domain>"
-                , "subject": "Sent from My MailerApp"
-                , "message": "Something happened"
-                , "to": "<some default email>"
-            }
+Mailer.send({
+    from: 'admin@example.com'
+    , to: user._id
+    , subject: 'hi!'
+    , text: 'Welcome to example.com a cool meteor app'
+    })
+```
+
+#Features
+
+So what do you gain by using the Mailer package instead of the Email package?
+
+1. Mailer will resolve userIds for you and turn them into email addresses
+2. Mailer will add some useful metadata to your emails and store them in a collection, for example fromId, toId, sentAt
+3. Mailer is extensible, you can add you're own metadata to store on sent emails
+4. Mailer supports routing, you can define custom routes which include their own custom defaults, for example:
+    ```
+    Mailer.route('passwordReset', {
+        from: 'support@example.com'
+        , to: function () {
+            return Meteor.user().emails[0].address
         }
-    }
-}
+        , subject: 'reset your password'
+        , text: function () {
+            return 'click this link to reset your password: ' + getPasswordResetLink();
+        }
+        })
+    // Sends the passwordReset email without your needing to specify
+    // any options
+    Mailer.send('passwordReset', {});
+    ```
+5. Mailer is highly customizable
 
-```
+# mailer-mandrill
 
-2. Create a new instance of `Mailer()`
+To get the most out of the mailer package, what you really want to do is use an ESP (email service provider) package like `useful:mailer-mandrill`, then you can take advantage of the mailer features for routing inbound email.
 
-```
-    var ButtonMailer = new Mailer({
-        from: '<some email address>'
-        // , message: 'This message overrides the json settings default'
-    });
-```
-3. Send an email
+# mailer-core
 
-```
-    ButtonMailer.send("NewMessage", {
-        subject: 'You have a new message from the future!'
-        // , message: 'This message overrides the constructor default'
-    }, function(response){
-        console.log('Mailer said: ' + response);
-    });
-```
+This package is a wrapper around the 'mailer-core' package which provides a handy framework for route-based actionable queues. You don't need to know how the mailer-core package works unless you want to customize the way this package works on the inside.
+
