@@ -3,7 +3,7 @@ function resolvePropertyValues(email) {
     if (_.isFunction(val))
       email[property] = val.call(this, email);
   });
-  
+
   _.each(this.options, function (val, property) {
     if (_.isFunction(val)) {
       val = val.call(this, email[property], email);
@@ -85,7 +85,7 @@ function factory(Mailer, config) {
  * @param {string} routeName The route to send with
  * @param {object} email The email to send
  * @param {object} options Any additional options for sending
- * 
+ *
  */
 
   Mailer.send = function (routeName, email, options) {
@@ -229,13 +229,13 @@ function factory(Mailer, config) {
     }
   });
 
-  Mailer.router.route('recieve', function (email) {
+  Mailer.router.route('receive', function (email) {
     if (Mailer.config.threading && Mailer.config.threading.setOutboundProperties) {
       Mailer.config.threading.setOutboundProperties(email);
     }
   }, function (email) {
-    if (Mailer.config.threading && Mailer.config.threading.onRecieveRoute)
-      return Mailer.send(Mailer.config.threading.onRecieveRoute, email);
+    if (Mailer.config.threading && Mailer.config.threading.onReceiveRoute)
+      return Mailer.send(Mailer.config.threading.onReceiveRoute, email);
   });
 
   Mailer.router.route('default', resolvePropertyValues, 'attachDefaultMetadata', 'resolveUserPreferences', 'resolveEmailAddresses', 'attachThreadingMetadata', 'resolveTemplates', 'sendViaDefaultServiceProvider', 'insertSentMessages');

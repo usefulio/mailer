@@ -375,7 +375,7 @@ Tinytest.add('Mailer - Mailer resolves threading properties' , function (test) {
   });
 });
 
-Tinytest.add('Mailer - Mailer should store and forward recieved emails' , function (test) {
+Tinytest.add('Mailer - Mailer should store and forward received emails' , function (test) {
   var CustomMailer = Mailer.factory(null, _.pick(Mailer.config, 'metadata', 'resolveEmailAddress'));
   CustomMailer.config.defaultServiceProvider = null;
   CustomMailer.config.threading = {
@@ -394,12 +394,12 @@ Tinytest.add('Mailer - Mailer should store and forward recieved emails' , functi
       email.toId = parts[2];
       delete email.to;
     }
-    , onRecieveRoute: 'default'
+    , onReceiveRoute: 'default'
   };
 
   var userId = Meteor.users.findOne()._id;
 
-  test.equal(CustomMailer.send('recieve', {
+  test.equal(CustomMailer.send('receive', {
     from: 'test-priority@example.com'
     , to: "123_" + userId + "+123@example.com"
   }), {
