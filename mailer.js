@@ -187,7 +187,7 @@ function factory(Mailer, config) {
   Mailer.router.route('resolveUserPreferences', function (email) {
     if (Mailer.config.resolveUserPreferences) {
       _.each(['to', 'cc', 'bcc', 'replyTo'], function (property) {
-        var emails = email[property + 'Id'];
+        var emails = email[property] || email[property + "Id"];
         if (!emails)
           return;
         if (!_.isArray(emails))
