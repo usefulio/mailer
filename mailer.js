@@ -340,9 +340,11 @@ Meteor.startup(function () {
           } else
             email.html = Blaze.toHTMLWithData(template, dataContext);
         }
-        var subjectTemplate = email.subjectTemplate;
+        var subjectTemplate = Template[email.subjectTemplate];
         if (subjectTemplate) {
-          email.subject = compileAndRender(subjectTemplate, dataContext);
+          email.subject = Blaze.toHTMLWithData(subjectTemplate, dataContext);
+        } else if (email.subjectTemplate) {
+          email.subject = compileAndRender(email.subjectTemplate, dataContext);
         }
       }
       , templateMetadata: {
