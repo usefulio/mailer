@@ -14,7 +14,7 @@ Package.describe({
 Npm.depends({ "stream-buffers": "0.2.5" });
 
 Package.onUse(function(api) {
-  api.versionsFrom('1.1.0.2');
+  api.versionsFrom('1.2.1');
   api.use('spacebars-compiler');
   api.use('underscore');
   api.use('accounts-base');
