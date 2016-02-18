@@ -17,6 +17,7 @@ Package.onUse(function(api) {
   api.versionsFrom('1.2.1');
   api.use('spacebars-compiler');
   api.use('underscore');
+  api.use('ecmascript');
   api.use('accounts-base');
   api.use('email', 'server');
   api.use('cwohlman:templating-server');
