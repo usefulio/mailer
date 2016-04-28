@@ -19,6 +19,7 @@ Package.onUse(function(api) {
   api.use('underscore');
   api.use('ecmascript');
   api.use('accounts-base');
+  api.use('mongo');
   api.use('email', 'server');
   api.use('cwohlman:templating-server');
   api.imply('cwohlman:templating-server');
